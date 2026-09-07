@@ -1,0 +1,306 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXContainerItemProxy section */
+		CF0000000000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CF0000000000000000000100 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CF0000000000000000000200;
+			remoteInfo = ClickFlow;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		CF0000000000000000000300 /* ClickFlow.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClickFlow.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CF0000000000000000000301 /* ClickFlowTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ClickFlowTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		CF0000000000000000000400 /* ClickFlow */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ClickFlow;
+			sourceTree = "<group>";
+		};
+		CF0000000000000000000401 /* ClickFlowTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = ClickFlowTests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		CF0000000000000000000500 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CF0000000000000000000501 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		CF0000000000000000000600 = {
+			isa = PBXGroup;
+			children = (
+				CF0000000000000000000400 /* ClickFlow */,
+				CF0000000000000000000401 /* ClickFlowTests */,
+				CF0000000000000000000601 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		CF0000000000000000000601 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CF0000000000000000000300 /* ClickFlow.app */,
+				CF0000000000000000000301 /* ClickFlowTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		CF0000000000000000000200 /* ClickFlow */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CF0000000000000000000700 /* Build configuration list for PBXNativeTarget "ClickFlow" */;
+			buildPhases = (
+				CF0000000000000000000800 /* Sources */,
+				CF0000000000000000000500 /* Frameworks */,
+				CF0000000000000000000900 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				CF0000000000000000000400 /* ClickFlow */,
+			);
+			name = ClickFlow;
+			packageProductDependencies = (
+			);
+			productName = ClickFlow;
+			productReference = CF0000000000000000000300 /* ClickFlow.app */;
+			productType = "com.apple.product-type.application";
+		};
+		CF0000000000000000000201 /* ClickFlowTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CF0000000000000000000701 /* Build configuration list for PBXNativeTarget "ClickFlowTests" */;
+			buildPhases = (
+				CF0000000000000000000801 /* Sources */,
+				CF0000000000000000000501 /* Frameworks */,
+				CF0000000000000000000901 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CF0000000000000000000A00 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				CF0000000000000000000401 /* ClickFlowTests */,
+			);
+			name = ClickFlowTests;
+			packageProductDependencies = (
+			);
+			productName = ClickFlowTests;
+			productReference = CF0000000000000000000301 /* ClickFlowTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		CF0000000000000000000100 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2700;
+				LastUpgradeCheck = 2700;
+				TargetAttributes = {
+					CF0000000000000000000200 = {
+						CreatedOnToolsVersion = 27.0;
+					};
+					CF0000000000000000000201 = {
+						CreatedOnToolsVersion = 27.0;
+						TestTargetID = CF0000000000000000000200;
+					};
+				};
+			};
+			buildConfigurationList = CF0000000000000000000702 /* Build configuration list for PBXProject "ClickFlow" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+				"zh-Hans",
+			);
+			mainGroup = CF0000000000000000000600;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = CF0000000000000000000601 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				CF0000000000000000000200 /* ClickFlow */,
+				CF0000000000000000000201 /* ClickFlowTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		CF0000000000000000000900 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		CF0000000000000000000901 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		CF0000000000000000000800 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+		CF0000000000000000000801 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		CF0000000000000000000A00 /* PBXTargetDependency */ = {isa = PBXTargetDependency; target = CF0000000000000000000200 /* ClickFlow */; targetProxy = CF0000000000000000000001 /* PBXContainerItemProxy */; };
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		CF0000000000000000000B00 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		CF0000000000000000000B01 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				ONLY_ACTIVE_ARCH = NO;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		CF0000000000000000000B10 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 5;
+				DEVELOPMENT_TEAM = HP5WBFL9G3;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = ClickFlow;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_LSMinimumSystemVersion = "$(MACOSX_DEPLOYMENT_TARGET)";
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.iven.ClickFlow;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		CF0000000000000000000B11 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "arm64 x86_64";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 5;
+				DEVELOPMENT_TEAM = HP5WBFL9G3;
+				ENABLE_TESTABILITY = NO;
+				ENABLE_APP_SANDBOX = NO;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = ClickFlow;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_LSMinimumSystemVersion = "$(MACOSX_DEPLOYMENT_TARGET)";
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.iven.ClickFlow;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		CF0000000000000000000B20 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = HP5WBFL9G3;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.iven.ClickFlowTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ClickFlow.app/Contents/MacOS/ClickFlow";
+			};
+			name = Debug;
+		};
+		CF0000000000000000000B21 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = HP5WBFL9G3;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.iven.ClickFlowTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 6.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/ClickFlow.app/Contents/MacOS/ClickFlow";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		CF0000000000000000000700 /* Build configuration list for PBXNativeTarget "ClickFlow" */ = {isa = XCConfigurationList; buildConfigurations = (CF0000000000000000000B10 /* Debug */, CF0000000000000000000B11 /* Release */); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		CF0000000000000000000701 /* Build configuration list for PBXNativeTarget "ClickFlowTests" */ = {isa = XCConfigurationList; buildConfigurations = (CF0000000000000000000B20 /* Debug */, CF0000000000000000000B21 /* Release */); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		CF0000000000000000000702 /* Build configuration list for PBXProject "ClickFlow" */ = {isa = XCConfigurationList; buildConfigurations = (CF0000000000000000000B00 /* Debug */, CF0000000000000000000B01 /* Release */); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+/* End XCConfigurationList section */
+	};
+	rootObject = CF0000000000000000000100 /* Project object */;
+}

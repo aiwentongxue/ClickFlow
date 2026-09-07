@@ -1,0 +1,82 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Xcode user data
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+
+# Xcode build
+build/
+Build/
+DerivedData/
+*.xcarchive
+*.ipa
+*.dSYM
+*.dSYM.zip
+
+# Swift Package Manager
+.build/
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+
+# Test output
+*.xcresult
+TestResults/
+TestReports/
+Reports/
+coverage/
+coverage.json
+coverage.xml
+*.profraw
+*Test Report*
+*测试报告*
+
+# Logs
+*.log
+Logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+.tmp/
+temp/
+tmp/
+
+# Backup files and directories
+*.bak
+*.backup
+*.old
+*.orig
+*.copy
+Backup/
+Backups/
+backup/
+backups/
+*.zip
+
+# Exported / built apps
+*.app
+*.pkg
+*.dmg
+
+# Local environment files
+.env
+.env.*
+!.env.example
+
+# IDE miscellaneous
+.idea/
+.vscode/
+
+# Crash / diagnostic output
+*.crash
+*.ips
+
+# Instruments / profiling output
+*.trace
