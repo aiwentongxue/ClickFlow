@@ -366,6 +366,27 @@ final class ClickFlowTests: XCTestCase {
         XCTAssertTrue(HotkeyConfiguration.defaults.isEmpty)
     }
 
+    @MainActor
+    func testDisclaimerAcceptancePersistsCurrentVersion() throws {
+        let suiteName = "ClickFlowTests.Disclaimer.\(UUID().uuidString)"
+        guard let defaults = UserDefaults(suiteName: suiteName) else {
+            return XCTFail("Could not create isolated defaults")
+        }
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        let store = DisclaimerAcceptanceStore(defaults: defaults)
+        XCTAssertFalse(store.hasAcceptedCurrentDisclaimer)
+
+        store.acceptCurrentDisclaimer()
+        XCTAssertTrue(DisclaimerAcceptanceStore(defaults: defaults).hasAcceptedCurrentDisclaimer)
+
+        defaults.set(
+            DisclaimerAcceptanceStore.currentVersion - 1,
+            forKey: DisclaimerAcceptanceStore.acceptanceVersionKey
+        )
+        XCTAssertFalse(DisclaimerAcceptanceStore(defaults: defaults).hasAcceptedCurrentDisclaimer)
+    }
+
     func testStorageSkipsDamagedMacroWithoutDeletingIt() async throws {
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)

@@ -8,6 +8,12 @@
 "status.stopped" = "Stopped";
 "status.unknown" = "Unknown";
 "app.message.title" = "ClickFlow";
+"disclaimer.title" = "Disclaimer";
+"disclaimer.acceptanceRequired" = "Please read the following notice before first use. ClickFlow is available only after you select Agree.";
+"disclaimer.accept" = "Agree";
+"disclaimer.decline" = "Decline and Quit";
+"disclaimer.menu.required" = "Read and accept the disclaimer in the main ClickFlow window first";
+"disclaimer.body" = "ClickFlow is a macOS mouse automation utility that provides features such as automatic clicking and mouse macro recording/playback.\n\nClickFlow is intended for lawful automation, productivity, accessibility, software testing, and educational purposes only.\n\nBy using ClickFlow, you acknowledge and agree that:\n\n• You are responsible for complying with the terms of service and rules of any third-party software, game, website, or service you use with ClickFlow.\n\n• Some applications and online services may prohibit automated input, macros, or similar tools. Use of ClickFlow may result in account restrictions or other consequences.\n\n• ClickFlow must not be used for unauthorized access, cheating, abuse, disruption, circumvention of security mechanisms, or any unlawful activity.\n\n• Automated mouse actions may interact with unintended UI elements due to changes in screen layout, window position, timing, display configuration, or application behavior.\n\n• You should carefully test macros before using them for destructive, financial, irreversible, or otherwise sensitive operations.\n\n• ClickFlow is provided \"AS IS\", without warranties of any kind.\n\n• To the maximum extent permitted by law, the developer shall not be liable for any direct or indirect damages resulting from the use or inability to use ClickFlow.\n\n• ClickFlow processes macro and configuration data locally by default and does not intentionally upload recorded mouse activity.\n\n• ClickFlow is an independent project and is not affiliated with or endorsed by Apple Inc. or any third-party software or game developer unless explicitly stated otherwise.\n\nUse ClickFlow responsibly.";
 "clicker.status" = "Status";
 "clicker.count" = "Executions";
 "clicker.configuration" = "Click Configuration";
