@@ -17,6 +17,7 @@ actor MacroPlayer {
     private var pressedButtons: Set<MouseButton> = []
     private var suspendedButtons: Set<MouseButton> = []
     private var lastPosition: ScreenPoint?
+    private var timelineClock = PlaybackTimelineClock()
 
     init(mouseEvents: any MouseEventPosting = MouseEventService()) {
         self.mouseEvents = mouseEvents
@@ -28,6 +29,16 @@ actor MacroPlayer {
         completion: @escaping @Sendable (String?) -> Void
     ) {
         guard runTask == nil else { return }
+        guard !macro.events.isEmpty else {
+            completion(String(localized: "error.emptyMacro"))
+            return
+        }
+        do { try MacroExchange.validate(.mouse(macro)) }
+        catch {
+            completion(error.localizedDescription)
+            return
+        }
+        lastPosition = nil
         let currentRunID = UUID()
         runID = currentRunID
         runTask = Task { [weak self] in
@@ -58,11 +69,13 @@ actor MacroPlayer {
     func togglePause() -> Bool? {
         guard runTask != nil else { return nil }
         if isPaused {
+            timelineClock.resume()
             isPaused = false
             resumePauseWaiters()
             AppLogger.automation.notice("Macro playback resumed")
         } else {
             isPaused = true
+            timelineClock.pause()
             delayTask?.cancel()
             suspendedButtons = pressedButtons
             releaseActiveButtons()
@@ -75,6 +88,7 @@ actor MacroPlayer {
         guard runID == id else { return }
         delayTask = nil
         isPaused = false
+        timelineClock.resume()
         resumePauseWaiters()
         runTask = nil
         runID = nil
@@ -91,12 +105,11 @@ actor MacroPlayer {
             while !Task.isCancelled {
                 if let totalLoops, loopIndex >= totalLoops { break }
                 loopIndex += 1
-                var priorTimestamp = 0.0
+                timelineClock.restart()
                 for (index, event) in macro.events.enumerated() {
                     try Task.checkCancellation()
-                    let eventDelay = max(0, event.timestampMilliseconds - priorTimestamp)
-                    try await pauseAwareSleep(milliseconds: PlaybackTiming.scaledMilliseconds(
-                        eventDelay,
+                    try await pauseAwareSleep(untilMilliseconds: PlaybackTiming.scaledMilliseconds(
+                        event.timestampMilliseconds,
                         speed: macro.playbackSpeed
                     ))
                     if isPaused {
@@ -105,7 +118,6 @@ actor MacroPlayer {
                         try restoreSuspendedButtons()
                     }
                     try post(event)
-                    priorTimestamp = max(priorTimestamp, event.timestampMilliseconds)
                     progress(
                         MacroPlaybackProgress(
                             eventIndex: index + 1,
@@ -116,9 +128,12 @@ actor MacroPlayer {
                     )
                 }
 
+                // Each iteration starts with released input, including incomplete recordings.
+                cleanupAllPressedButtons()
                 if totalLoops.map({ loopIndex < $0 }) ?? true {
                     if macro.repeatDelayMilliseconds > 0 {
-                        try await pauseAwareSleep(milliseconds: macro.repeatDelayMilliseconds)
+                        timelineClock.restart()
+                        try await pauseAwareSleep(untilMilliseconds: macro.repeatDelayMilliseconds)
                     } else {
                         await Task.yield()
                         try Task.checkCancellation()
@@ -160,24 +175,19 @@ actor MacroPlayer {
         }
     }
 
-    private func pauseAwareSleep(milliseconds: Double) async throws {
-        var remaining = duration(milliseconds: milliseconds)
-        let clock = ContinuousClock()
-
-        while remaining > .zero {
+    private func pauseAwareSleep(untilMilliseconds milliseconds: Double) async throws {
+        while true {
             try await waitUntilResumed()
-            let startedAt = clock.now
-            let sleepDuration = remaining
-            let sleeper = Task<Void, Never> { @Sendable [sleepDuration] in
-                try? await ContinuousClock().sleep(for: sleepDuration)
+            let sleepDuration = timelineClock.remaining(untilMilliseconds: milliseconds)
+            guard sleepDuration > .zero else { return }
+            let deadline = timelineClock.deadline(untilMilliseconds: milliseconds)
+            let sleeper = Task<Void, Never>(priority: .high) { @Sendable [deadline] in
+                try? await ContinuousClock().sleep(until: deadline, tolerance: .zero)
             }
             delayTask = sleeper
             await sleeper.value
             delayTask = nil
-            let elapsed = startedAt.duration(to: clock.now)
-            remaining = elapsed < remaining ? remaining - elapsed : .zero
             try Task.checkCancellation()
-            if !isPaused { return }
         }
     }
 
@@ -220,7 +230,4 @@ actor MacroPlayer {
         suspendedButtons.removeAll()
     }
 
-    private func duration(milliseconds: Double) -> Duration {
-        .nanoseconds(Int64(max(0, milliseconds) * 1_000_000))
-    }
 }

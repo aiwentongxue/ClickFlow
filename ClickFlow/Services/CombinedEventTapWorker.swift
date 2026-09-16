@@ -11,6 +11,7 @@ struct CapturedSystemInput: Sendable {
         case keyUp
     }
 
+    var timestampNanoseconds: UInt64
     var kind: Kind
     var position: ScreenPoint?
     var button: MouseButton?
@@ -110,17 +111,31 @@ final class CombinedEventTapWorker: @unchecked Sendable {
     }
 
     private func makeInput(type: CGEventType, event: CGEvent) -> CapturedSystemInput? {
+        let timestamp = event.timestamp > 0
+            ? event.timestamp
+            : DispatchTime.now().uptimeNanoseconds
         let location = event.location
         let point = ScreenPoint(x: location.x, y: location.y)
         switch type {
         case .mouseMoved, .leftMouseDragged, .rightMouseDragged, .otherMouseDragged:
-            return CapturedSystemInput(kind: .mouseMove, position: point)
+            return CapturedSystemInput(timestampNanoseconds: timestamp, kind: .mouseMove, position: point)
         case .leftMouseDown, .rightMouseDown, .otherMouseDown:
-            return CapturedSystemInput(kind: .mouseDown, position: point, button: mouseButton(type, event))
+            return CapturedSystemInput(
+                timestampNanoseconds: timestamp,
+                kind: .mouseDown,
+                position: point,
+                button: mouseButton(type, event)
+            )
         case .leftMouseUp, .rightMouseUp, .otherMouseUp:
-            return CapturedSystemInput(kind: .mouseUp, position: point, button: mouseButton(type, event))
+            return CapturedSystemInput(
+                timestampNanoseconds: timestamp,
+                kind: .mouseUp,
+                position: point,
+                button: mouseButton(type, event)
+            )
         case .scrollWheel:
             return CapturedSystemInput(
+                timestampNanoseconds: timestamp,
                 kind: .scroll,
                 position: point,
                 scrollDeltaX: Int32(clamping: event.getIntegerValueField(.scrollWheelEventPointDeltaAxis2)),
@@ -128,6 +143,7 @@ final class CombinedEventTapWorker: @unchecked Sendable {
             )
         case .keyDown, .keyUp:
             return CapturedSystemInput(
+                timestampNanoseconds: timestamp,
                 kind: type == .keyDown ? .keyDown : .keyUp,
                 keyCode: UInt16(clamping: event.getIntegerValueField(.keyboardEventKeycode)),
                 keyboardModifiers: event.flags.rawValue
@@ -135,6 +151,7 @@ final class CombinedEventTapWorker: @unchecked Sendable {
         case .flagsChanged:
             let code = UInt16(clamping: event.getIntegerValueField(.keyboardEventKeycode))
             return CapturedSystemInput(
+                timestampNanoseconds: timestamp,
                 kind: modifierIsDown(keyCode: code, flags: event.flags) ? .keyDown : .keyUp,
                 keyCode: code,
                 keyboardModifiers: event.flags.rawValue

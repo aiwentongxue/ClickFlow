@@ -3,8 +3,7 @@ import Foundation
 
 actor CombinedMacroRecorder {
     private let worker: CombinedEventTapWorker
-    private let clock = ContinuousClock()
-    private var startInstant: ContinuousClock.Instant?
+    private var startTimestampNanoseconds: UInt64?
     private var events: [CombinedMacroEvent] = []
     private var mouseRecordingMode: MouseRecordingMode = .fullMotion
     private var progressHandler: (@Sendable (RecorderProgress) -> Void)?
@@ -32,7 +31,7 @@ actor CombinedMacroRecorder {
         pendingMove = nil
         mouseRecordingMode = mouseMode
         progressHandler = progress
-        startInstant = clock.now
+        startTimestampNanoseconds = DispatchTime.now().uptimeNanoseconds
         GCController.shouldMonitorBackgroundEvents = true
 
         try worker.start { [weak self] input in
@@ -65,7 +64,7 @@ actor CombinedMacroRecorder {
         GCController.shouldMonitorBackgroundEvents = false
         flushPendingMove()
         progressHandler = nil
-        startInstant = nil
+        startTimestampNanoseconds = nil
         let ordered = events.sorted { $0.timestampMilliseconds < $1.timestampMilliseconds }
         guard let first = ordered.first?.timestampMilliseconds else { return [] }
         var result = ordered.map {
@@ -89,7 +88,7 @@ actor CombinedMacroRecorder {
     private func consume(_ input: CapturedSystemInput) {
         guard isRecording else { return }
         let event = CombinedMacroEvent(
-            timestampMilliseconds: elapsedMilliseconds(),
+            timestampMilliseconds: elapsedMilliseconds(at: input.timestampNanoseconds),
             kind: combinedKind(input.kind),
             position: input.position,
             button: input.button,
@@ -195,10 +194,15 @@ actor CombinedMacroRecorder {
     }
 
     private func elapsedMilliseconds() -> Double {
-        guard let startInstant else { return 0 }
-        let elapsed = startInstant.duration(to: clock.now)
-        return Double(elapsed.components.seconds) * 1_000 +
-            Double(elapsed.components.attoseconds) / 1_000_000_000_000_000
+        elapsedMilliseconds(at: DispatchTime.now().uptimeNanoseconds)
+    }
+
+    private func elapsedMilliseconds(at timestampNanoseconds: UInt64) -> Double {
+        guard let startTimestampNanoseconds else { return 0 }
+        let elapsed = timestampNanoseconds >= startTimestampNanoseconds
+            ? timestampNanoseconds - startTimestampNanoseconds
+            : 0
+        return Double(elapsed) / 1_000_000
     }
 
     private func publishProgress() {

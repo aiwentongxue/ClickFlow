@@ -54,6 +54,9 @@ struct MacroListView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .navigationTitle("sidebar.macros")
         .toolbar {
+            MacroSharingControls(macro: appState.selectedMacro.map { SharedMacro.mouse($0) })
+        }
+        .toolbar {
             Menu("macros.recordingOptions", systemImage: "slider.horizontal.3") {
                 Picker("macros.mouseRecordingMode", selection: $appState.mouseRecordingMode) {
                     Text("macros.recordMotion").tag(MouseRecordingMode.fullMotion)

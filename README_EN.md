@@ -6,6 +6,14 @@
 
 ClickFlow is a native macOS input automation utility built with Swift, SwiftUI, AppKit, Quartz, GameController, and a small Carbon API wrapper. It provides mouse and keyboard auto-clicking, global mouse macros, combined macros, global hotkeys, and menu bar controls.
 
+## Macro loops and sharing
+
+Both macro editors offer Once, Specified Count, and Unlimited playback. Enter the total number of plays directly, including the first play. Loop delays are independent of playback speed. Held mouse buttons and keys are released after each iteration. The playback bar shows the current loop and provides pause, resume, and stop controls.
+
+Select a macro and click Export Macro to share its JSON file. Import Macro on either macro page detects the type, saves a new copy, and selects it without replacing existing macros or starting playback. Events, speed, repeat mode, count, and delay are preserved. Sharing files are limited to 20 MB; invalid or unsupported files report an error.
+
+Mouse coordinates retain their original screen positions; recipients should adjust them for their display and target window. Controller events can be shared but retain the playback limitations described below.
+
 ## Features
 
 - Automatically repeat the left, right, or middle mouse button, or a custom keyboard key.
@@ -19,6 +27,7 @@ ClickFlow is a native macOS input automation utility built with Swift, SwiftUI, 
 - Continue recording at the end of an existing mouse or combined macro. Clicking the on-screen stop button is excluded from the saved recording.
 - Sample mouse movement at approximately 60 Hz with a distance threshold to reduce redundant events.
 - Play macros at 0.25×, 0.5×, 1×, 1.5×, 2×, or 4× speed.
+- Schedule against absolute recorded timestamps so event-posting overhead does not progressively slow complex macros.
 - Pause and resume mouse or combined macro playback. Pausing freezes the timeline and safely releases held inputs.
 - Run once, repeat a specified number of times, or loop indefinitely with a configurable loop delay.
 - Edit macro events in a table, delete multiple events, reorder steps, and undo changes.

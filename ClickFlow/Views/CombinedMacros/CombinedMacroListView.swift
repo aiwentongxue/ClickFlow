@@ -48,6 +48,9 @@ struct CombinedMacroListView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .navigationTitle("sidebar.combinedMacros")
         .toolbar {
+            MacroSharingControls(macro: appState.selectedCombinedMacro.map { SharedMacro.combined($0) })
+        }
+        .toolbar {
             Menu("macros.recordingOptions", systemImage: "slider.horizontal.3") {
                 Picker("macros.mouseRecordingMode", selection: $appState.mouseRecordingMode) {
                     Text("macros.recordMotion").tag(MouseRecordingMode.fullMotion)
@@ -146,29 +149,12 @@ private struct CombinedMacroEditorView: View {
                 }
                 .disabled(appState.isRecordingCombinedMacro)
             }
-            HStack {
-                Picker("macro.repeatMode", selection: macroBinding(\.repeatMode)) {
-                    Text("macro.repeat.once").tag(MacroRepeatMode.once)
-                    Text("macro.repeat.count").tag(MacroRepeatMode.count)
-                    Text("macro.repeat.unlimited").tag(MacroRepeatMode.unlimited)
-                }
-                if macro.repeatMode == .count {
-                    Stepper(value: macroBinding(\.repeatCount), in: 1...100_000) {
-                        Text("\(macro.repeatCount)×")
-                    }
-                    .frame(maxWidth: 140)
-                }
-                Picker("macro.speed", selection: macroBinding(\.playbackSpeed)) {
-                    ForEach([0.25, 0.5, 1, 1.5, 2, 4], id: \.self) { speed in
-                        Text("\(speed.formatted(.number.precision(.fractionLength(0...2))))×").tag(speed)
-                    }
-                }
-                LabeledContent("macro.repeatDelay") {
-                    TextField("", value: macroBinding(\.repeatDelayMilliseconds), format: .number)
-                        .frame(width: 70)
-                    Text("ms")
-                }
-            }
+            MacroPlaybackSettingsView(
+                repeatMode: macroBinding(\.repeatMode),
+                repeatCount: macroBinding(\.repeatCount),
+                repeatDelayMilliseconds: macroBinding(\.repeatDelayMilliseconds),
+                playbackSpeed: macroBinding(\.playbackSpeed)
+            )
             if macro.containsControllerEvents {
                 Label("combined.controller.playbackLimitation", systemImage: "exclamationmark.triangle")
                     .font(.footnote)

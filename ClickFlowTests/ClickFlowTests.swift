@@ -596,10 +596,15 @@ private final class RecordedMouseEvents: MouseEventPosting, @unchecked Sendable 
 
     private let lock = NSLock()
     private let configuredCurrentPosition: ScreenPoint
+    private let postingDelay: TimeInterval
     private var events: [Event] = []
 
-    init(currentPosition: ScreenPoint = .init(x: 0, y: 0)) {
+    init(
+        currentPosition: ScreenPoint = .init(x: 0, y: 0),
+        postingDelayMilliseconds: Double = 0
+    ) {
         configuredCurrentPosition = currentPosition
+        postingDelay = postingDelayMilliseconds / 1_000
     }
 
     func currentPosition() -> ScreenPoint { configuredCurrentPosition }
@@ -639,6 +644,289 @@ private final class RecordedMouseEvents: MouseEventPosting, @unchecked Sendable 
     }
 
     private func append(_ event: Event) {
+        if postingDelay > 0 {
+            Thread.sleep(forTimeInterval: postingDelay)
+        }
         lock.withLock { events.append(event) }
+    }
+}
+
+extension ClickFlowTests {
+    func testSharingRoundTripPreservesBothMacroTypesAndPlaybackSettings() throws {
+        let mouse = MouseMacro(name: "共享鼠标", events: [
+            .init(timestampMilliseconds: 12, kind: .scroll, position: .init(x: -20, y: 30), scrollDeltaX: 2, scrollDeltaY: -3)
+        ], repeatMode: .count, repeatCount: 7, repeatDelayMilliseconds: 250, playbackSpeed: 1.5)
+        let combined = CombinedMacro(name: "共享组合", events: [
+            .init(timestampMilliseconds: 0, kind: .keyDown, keyCode: 3, keyboardModifiers: CGEventFlags.maskShift.rawValue),
+            .init(timestampMilliseconds: 10, kind: .keyUp, keyCode: 3),
+            .init(timestampMilliseconds: 20, kind: .controller, controllerName: "Xbox", controlName: "A", controlValue: 1)
+        ], repeatMode: .unlimited, repeatCount: 9, repeatDelayMilliseconds: 300, playbackSpeed: 2)
+        guard case .mouse(let mouseCopy) = try MacroExchange.decode(MacroExchange.encode(.mouse(mouse))),
+              case .combined(let combinedCopy) = try MacroExchange.decode(MacroExchange.encode(.combined(combined))) else {
+            return XCTFail("Macro type was not preserved")
+        }
+        XCTAssertEqual(mouseCopy.events, mouse.events)
+        XCTAssertEqual(mouseCopy.name, mouse.name)
+        XCTAssertEqual(mouseCopy.repeatMode, .count)
+        XCTAssertEqual(mouseCopy.repeatCount, 7)
+        XCTAssertEqual(mouseCopy.repeatDelayMilliseconds, 250)
+        XCTAssertEqual(mouseCopy.playbackSpeed, 1.5)
+        XCTAssertEqual(combinedCopy.events, combined.events)
+        XCTAssertEqual(combinedCopy.repeatMode, .unlimited)
+        XCTAssertEqual(combinedCopy.repeatCount, 9)
+        XCTAssertEqual(combinedCopy.repeatDelayMilliseconds, 300)
+        XCTAssertEqual(combinedCopy.playbackSpeed, 2)
+        // A combined macro with only mouse events must remain a combined macro.
+        let mouseOnly = CombinedMacro(name: "Mouse only", events: [.init(timestampMilliseconds: 0, kind: .mouseMove)])
+        guard case .combined = try MacroExchange.decode(MacroExchange.encode(.combined(mouseOnly))) else {
+            return XCTFail("Combined macro was misclassified")
+        }
+    }
+
+    func testImportedFilesCreateIndependentPersistedCopies() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let url = directory.appendingPathComponent("shared.json")
+        let original = MouseMacro(name: "Same name", events: [.init(timestampMilliseconds: 0, kind: .mouseMove)], repeatMode: .count, repeatCount: 4)
+        try MacroExchange.encode(.mouse(original)).write(to: url)
+        guard case .mouse(let first) = try MacroExchange.read(from: url),
+              case .mouse(let second) = try MacroExchange.read(from: url) else { return XCTFail("Wrong type") }
+        XCTAssertNotEqual(first.id, original.id)
+        XCTAssertNotEqual(first.id, second.id)
+        let storage = MacroStorage(directoryURL: directory.appendingPathComponent("mouse"))
+        try await storage.save(original)
+        try await storage.save(first)
+        try await storage.save(second)
+        let loaded = await storage.loadAll()
+        XCTAssertEqual(loaded.macros.count, 3)
+        XCTAssertTrue(loaded.macros.allSatisfy { $0.repeatCount == 4 })
+        let combined = CombinedMacro(name: "Combined", repeatMode: .unlimited, repeatDelayMilliseconds: 100)
+        try MacroExchange.encode(.combined(combined)).write(to: url)
+        guard case .combined(let copy) = try MacroExchange.read(from: url) else { return XCTFail("Wrong type") }
+        XCTAssertNotEqual(copy.id, combined.id)
+        let combinedStorage = CombinedMacroStorage(directoryURL: directory.appendingPathComponent("combined"))
+        try await combinedStorage.save(copy)
+        let combinedLoaded = await combinedStorage.loadAll()
+        XCTAssertEqual(combinedLoaded.macros.first?.repeatMode, .unlimited)
+        XCTAssertEqual(combinedLoaded.macros.first?.repeatDelayMilliseconds, 100)
+    }
+
+    func testSharingRejectsMalformedVersionsTypesAndUnsafeTimelines() throws {
+        let macro = MouseMacro(name: "Valid", events: [.init(timestampMilliseconds: 0, kind: .mouseMove)])
+        let data = try MacroExchange.encode(.mouse(macro))
+        let original = try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        for change: (String, Any) in [("version", 999), ("kind", "combined"), ("format", "Other")] {
+            var object = original
+            object[change.0] = change.1
+            XCTAssertThrowsError(try MacroExchange.decode(JSONSerialization.data(withJSONObject: object)))
+        }
+        for field in ["timestampMilliseconds"] {
+            for value in [-1.0, 1e100] {
+                var object = original
+                var payload = try XCTUnwrap(object["mouseMacro"] as? [String: Any])
+                var events = try XCTUnwrap(payload["events"] as? [[String: Any]])
+                events[0][field] = value
+                payload["events"] = events
+                object["mouseMacro"] = payload
+                XCTAssertThrowsError(try MacroExchange.decode(JSONSerialization.data(withJSONObject: object)))
+            }
+        }
+        var invalid = macro
+        invalid.events.append(invalid.events[0])
+        XCTAssertThrowsError(try MacroExchange.encode(.mouse(invalid)))
+        invalid = macro
+        invalid.repeatDelayMilliseconds = .infinity
+        XCTAssertThrowsError(try MacroExchange.encode(.mouse(invalid)))
+        invalid = macro
+        invalid.events[0].kind = .mouseDown
+        XCTAssertThrowsError(try MacroExchange.encode(.mouse(invalid)))
+        XCTAssertThrowsError(try MacroExchange.decode(Data("not JSON".utf8)))
+        XCTAssertThrowsError(try MacroExchange.decode(Data(repeating: 0, count: MacroExchange.maximumFileSize + 1)))
+    }
+
+    func testBothPlayersRepeatExactCountAndReleaseInputsBetweenLoops() async throws {
+        let recorder = RecordedMouseEvents()
+        let mouse = MacroPlayer(mouseEvents: recorder)
+        let mouseMacro = MouseMacro(name: "Three", events: [
+            .init(timestampMilliseconds: 0, kind: .mouseDown, button: .left)
+        ], repeatMode: .count, repeatCount: 3, repeatDelayMilliseconds: 60, playbackSpeed: 4)
+        await mouse.start(macro: mouseMacro, progress: { _ in }, completion: { error in XCTAssertNil(error) })
+        try await waitUntilStopped(mouse)
+        var events = recorder.snapshot()
+        XCTAssertEqual(events.map(\.isDown), [true, false, true, false, true, false])
+        XCTAssertGreaterThanOrEqual(events[2].time - events[1].time, 0.05)
+        recorder.reset()
+        let combined = CombinedMacroPlayer(events: recorder)
+        let combinedMacro = CombinedMacro(name: "Three", events: [
+            .init(timestampMilliseconds: 0, kind: .keyDown, keyCode: 3)
+        ], repeatMode: .count, repeatCount: 3, repeatDelayMilliseconds: 60, playbackSpeed: 4)
+        await combined.start(macro: combinedMacro, progress: { _ in }, completion: { error in XCTAssertNil(error) })
+        try await waitUntilStopped(combined)
+        events = recorder.snapshot()
+        XCTAssertEqual(events.map(\.isDown), [true, false, true, false, true, false])
+        XCTAssertGreaterThanOrEqual(events[2].time - events[1].time, 0.05)
+    }
+
+    func testUnlimitedMouseLoopPausesResumesAndStopsWithZeroDelay() async throws {
+        let recorder = RecordedMouseEvents()
+        let player = MacroPlayer(mouseEvents: recorder)
+        let macro = MouseMacro(name: "Unlimited", events: [
+            .init(timestampMilliseconds: 0, kind: .mouseDown, button: .left),
+            .init(timestampMilliseconds: 0, kind: .mouseUp, button: .left)
+        ], repeatMode: .unlimited)
+        await player.start(macro: macro, progress: { progress in XCTAssertNil(progress.loopCount) }, completion: { error in XCTAssertNil(error) })
+        try await Task.sleep(for: .milliseconds(30))
+        let paused = await player.togglePause()
+        XCTAssertEqual(paused, true)
+        let count = recorder.snapshot().count
+        XCTAssertGreaterThan(count, 2)
+        try await Task.sleep(for: .milliseconds(40))
+        XCTAssertEqual(recorder.snapshot().count, count)
+        _ = await player.togglePause()
+        try await Task.sleep(for: .milliseconds(30))
+        XCTAssertGreaterThan(recorder.snapshot().count, count)
+        await player.stop()
+        let stoppedCount = recorder.snapshot().count
+        try await Task.sleep(for: .milliseconds(30))
+        XCTAssertEqual(recorder.snapshot().count, stoppedCount)
+        let running = await player.isRunning()
+        XCTAssertFalse(running)
+    }
+
+    func testUnlimitedCombinedLoopPausesResumesAndStopsWithZeroDelay() async throws {
+        let recorder = RecordedMouseEvents()
+        let player = CombinedMacroPlayer(events: recorder)
+        let macro = CombinedMacro(name: "Unlimited", events: [
+            .init(timestampMilliseconds: 0, kind: .keyDown, keyCode: 3),
+            .init(timestampMilliseconds: 0, kind: .keyUp, keyCode: 3)
+        ], repeatMode: .unlimited)
+        await player.start(macro: macro, progress: { progress in XCTAssertNil(progress.loopCount) }, completion: { error in XCTAssertNil(error) })
+        try await Task.sleep(for: .milliseconds(30))
+        let paused = await player.togglePause()
+        XCTAssertEqual(paused, true)
+        let count = recorder.snapshot().count
+        XCTAssertGreaterThan(count, 2)
+        try await Task.sleep(for: .milliseconds(40))
+        XCTAssertEqual(recorder.snapshot().count, count)
+        _ = await player.togglePause()
+        try await Task.sleep(for: .milliseconds(30))
+        XCTAssertGreaterThan(recorder.snapshot().count, count)
+        await player.stop()
+        let stoppedCount = recorder.snapshot().count
+        try await Task.sleep(for: .milliseconds(30))
+        XCTAssertEqual(recorder.snapshot().count, stoppedCount)
+        let running = await player.isRunning()
+        XCTAssertFalse(running)
+    }
+
+    func testStopWhilePausedInLongLoopDelayForBothPlayers() async throws {
+        let recorder = RecordedMouseEvents()
+        let mouse = MacroPlayer(mouseEvents: recorder)
+        let combined = CombinedMacroPlayer(events: recorder)
+        await mouse.start(macro: MouseMacro(name: "Delay", events: [.init(timestampMilliseconds: 0, kind: .mouseDown, button: .left)], repeatMode: .unlimited, repeatDelayMilliseconds: 60_000), progress: { _ in }, completion: { _ in })
+        try await Task.sleep(for: .milliseconds(40))
+        _ = await mouse.togglePause()
+        XCTAssertEqual(recorder.snapshot().map(\.isDown), [true, false])
+        await mouse.stop()
+        recorder.reset()
+        await combined.start(macro: CombinedMacro(name: "Delay", events: [.init(timestampMilliseconds: 0, kind: .keyDown, keyCode: 3)], repeatMode: .unlimited, repeatDelayMilliseconds: 60_000), progress: { _ in }, completion: { _ in })
+        try await Task.sleep(for: .milliseconds(40))
+        _ = await combined.togglePause()
+        XCTAssertEqual(recorder.snapshot().map(\.isDown), [true, false])
+        await combined.stop()
+        let mouseRunning = await mouse.isRunning()
+        let combinedRunning = await combined.isRunning()
+        XCTAssertFalse(mouseRunning)
+        XCTAssertFalse(combinedRunning)
+    }
+
+    func testMousePlaybackUsesAbsoluteTimelineWhenPostingHasLatency() async throws {
+        let recorder = RecordedMouseEvents(postingDelayMilliseconds: 10)
+        let player = MacroPlayer(mouseEvents: recorder)
+        let events = (0...30).map { index in
+            MacroEvent(
+                timestampMilliseconds: Double(index) * 25,
+                kind: .mouseMove,
+                position: .init(x: Double(index), y: 0)
+            )
+        }
+        await player.start(
+            macro: MouseMacro(name: "Absolute timeline", events: events),
+            progress: { _ in },
+            completion: { error in XCTAssertNil(error) }
+        )
+        try await waitUntilStopped(player)
+
+        let posted = recorder.snapshot()
+        let elapsed = try XCTUnwrap(posted.last?.time) - XCTUnwrap(posted.first?.time)
+        XCTAssertEqual(posted.count, events.count)
+        XCTAssertGreaterThan(elapsed, 0.65)
+        XCTAssertLessThan(elapsed, 0.92)
+    }
+
+    func testCombinedPlaybackKeepsHeldKeyDurationOnAbsoluteTimeline() async throws {
+        let recorder = RecordedMouseEvents(postingDelayMilliseconds: 10)
+        let player = CombinedMacroPlayer(events: recorder)
+        var events = (0..<30).map { index in
+            CombinedMacroEvent(
+                timestampMilliseconds: Double(index) * 25,
+                kind: .keyDown,
+                keyCode: 13,
+                keyDisplayName: "W"
+            )
+        }
+        events.append(.init(
+            timestampMilliseconds: 750,
+            kind: .keyUp,
+            keyCode: 13,
+            keyDisplayName: "W"
+        ))
+        await player.start(
+            macro: CombinedMacro(name: "Held W", events: events),
+            progress: { _ in },
+            completion: { error in XCTAssertNil(error) }
+        )
+        try await waitUntilStopped(player)
+
+        let posted = recorder.snapshot()
+        let heldDuration = try XCTUnwrap(posted.last?.time) - XCTUnwrap(posted.first?.time)
+        XCTAssertEqual(posted.count, events.count)
+        XCTAssertGreaterThan(heldDuration, 0.65)
+        XCTAssertLessThan(heldDuration, 0.92)
+        XCTAssertEqual(posted.last?.isDown, false)
+    }
+
+    func testOneMinuteCombinedTimelineDoesNotAccumulateSchedulerOrPostingDelay() async throws {
+        let recorder = RecordedMouseEvents(postingDelayMilliseconds: 1)
+        let player = CombinedMacroPlayer(events: recorder)
+        var events = stride(from: 0.0, through: 59_940.0, by: 90.0).map { timestamp in
+            CombinedMacroEvent(
+                timestampMilliseconds: timestamp,
+                kind: .keyDown,
+                keyCode: 13,
+                keyDisplayName: "W"
+            )
+        }
+        events.append(.init(
+            timestampMilliseconds: 60_000,
+            kind: .keyUp,
+            keyCode: 13,
+            keyDisplayName: "W"
+        ))
+        await player.start(
+            macro: CombinedMacro(name: "One minute held W", events: events),
+            progress: { _ in },
+            completion: { error in XCTAssertNil(error) }
+        )
+        try await waitUntilStopped(player, timeout: .seconds(65))
+
+        let posted = recorder.snapshot()
+        let heldDuration = try XCTUnwrap(posted.last?.time) - XCTUnwrap(posted.first?.time)
+        print("One-minute combined timeline elapsed: \(heldDuration) seconds")
+        XCTAssertEqual(posted.count, events.count)
+        XCTAssertGreaterThan(heldDuration, 59.85)
+        XCTAssertLessThan(heldDuration, 60.20)
+        XCTAssertEqual(posted.last?.isDown, false)
     }
 }

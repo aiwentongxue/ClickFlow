@@ -29,6 +29,7 @@ final class AppState: ObservableObject {
     @Published var combinedPlaybackProgress = 0.0
     @Published var combinedPlaybackLoop = 0
     @Published var combinedPlaybackLoopCount: Int?
+    @Published var isImportingMacro = false
     @Published var userMessage: String?
 
     private var clickerSessionID: UUID?
@@ -83,6 +84,30 @@ final class AppState: ObservableObject {
 
     var selectedCombinedMacro: CombinedMacro? {
         combinedMacros.first { $0.id == selectedCombinedMacroID }
+    }
+
+    func importMacro(from url: URL) {
+        guard !isImportingMacro else { return }
+        isImportingMacro = true
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            defer { isImportingMacro = false }
+            do {
+                let imported = try await Task.detached { try MacroExchange.read(from: url) }.value
+                switch imported {
+                case .mouse(let macro):
+                    try await macroStorage.save(macro)
+                    macros.insert(macro, at: 0)
+                    selectedMacroID = macro.id
+                    selectedPage = .macros
+                case .combined(let macro):
+                    try await combinedMacroStorage.save(macro)
+                    combinedMacros.insert(macro, at: 0)
+                    selectedCombinedMacroID = macro.id
+                    selectedPage = .combinedMacros
+                }
+            } catch { userMessage = error.localizedDescription }
+        }
     }
 
     func captureCurrentPosition() {
@@ -674,6 +699,7 @@ final class AppState: ObservableObject {
                 macro: combinedMacro,
                 progress: { [weak self] progress in
                     Task { @MainActor in
+                        guard self?.combinedPlaybackSessionID == sessionID else { return }
                         self?.combinedPlaybackProgress = progress.eventCount == 0
                             ? 0 : Double(progress.eventIndex) / Double(progress.eventCount)
                         self?.combinedPlaybackLoop = progress.loopIndex
@@ -734,6 +760,7 @@ final class AppState: ObservableObject {
                 macro: macro,
                 progress: { [weak self] progress in
                     Task { @MainActor in
+                        guard self?.playbackSessionID == sessionID else { return }
                         self?.playbackProgress = progress.eventCount == 0
                             ? 0
                             : Double(progress.eventIndex) / Double(progress.eventCount)

@@ -112,9 +112,9 @@
 "macros.recordClickPositionsOnly" = "只记录点击位置";
 "macros.playingLoop %lld" = "第 %lld 轮";
 "macro.repeatMode" = "循环";
-"macro.repeat.once" = "一次";
+"macro.repeat.once" = "播放一次";
 "macro.repeat.count" = "指定次数";
-"macro.repeat.unlimited" = "无限";
+"macro.repeat.unlimited" = "无限循环";
 "macro.speed" = "播放速度";
 "macro.repeatDelay" = "循环间隔";
 "macro.time" = "时间 (ms)";
@@ -168,3 +168,14 @@
 "combined.controller.playbackLimitation" = "手柄输入已完整保存在时间轴中；macOS 的公开 API 不支持向其他应用注入手柄事件，因此播放时只还原鼠标和键盘。";
 "error.noCombinedMacro" = "当前没有可播放的组合宏。";
 "error.damagedCombinedMacros %@" = "部分组合宏文件无法读取，文件已保持原样：%@";
+
+// Macro playback and sharing
+"macro.playbackSettings" = "播放设置";
+"macro.repeatCount" = "播放次数";
+"macro.repeatCount.help" = "包含第一次播放。例如填 3，共播放 3 次。";
+"macro.repeatUnlimited.help" = "持续循环，直到点击停止或使用停止快捷键。";
+"sharing.import" = "导入宏";
+"sharing.export" = "导出宏";
+"sharing.error.invalid" = "无法读取宏：文件格式、事件或播放设置无效。请选择 ClickFlow 导出的 JSON 文件。";
+"sharing.error.version" = "此宏文件版本不受支持，请使用兼容版本的 ClickFlow。";
+"sharing.error.size" = "宏分享文件不能超过 20 MB。";

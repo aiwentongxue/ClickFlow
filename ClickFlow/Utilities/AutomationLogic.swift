@@ -6,6 +6,54 @@ enum PlaybackTiming {
     }
 }
 
+/// Tracks playback against absolute points on the recorded timeline. Event
+/// posting and scheduler overhead therefore do not accumulate into later
+/// events, while time spent paused remains excluded from playback time.
+struct PlaybackTimelineClock {
+    private let clock = ContinuousClock()
+    private var origin: ContinuousClock.Instant
+    private var pausedDuration: Duration = .zero
+    private var pauseBeganAt: ContinuousClock.Instant?
+
+    init() {
+        origin = clock.now
+    }
+
+    mutating func restart() {
+        origin = clock.now
+        pausedDuration = .zero
+        pauseBeganAt = nil
+    }
+
+    mutating func pause() {
+        guard pauseBeganAt == nil else { return }
+        pauseBeganAt = clock.now
+    }
+
+    mutating func resume() {
+        guard let pauseBeganAt else { return }
+        pausedDuration += pauseBeganAt.duration(to: clock.now)
+        self.pauseBeganAt = nil
+    }
+
+    func remaining(untilMilliseconds milliseconds: Double) -> Duration {
+        let deadline = deadline(untilMilliseconds: milliseconds)
+        let now = clock.now
+        return deadline > now ? now.duration(to: deadline) : .zero
+    }
+
+    /// Returns an absolute deadline so time spent creating and scheduling the
+    /// sleeper cannot be added to the recorded timeline.
+    func deadline(untilMilliseconds milliseconds: Double) -> ContinuousClock.Instant {
+        let target = Duration.nanoseconds(Int64(max(0, milliseconds) * 1_000_000))
+        var totalPaused = pausedDuration
+        if let pauseBeganAt {
+            totalPaused += pauseBeganAt.duration(to: clock.now)
+        }
+        return origin.advanced(by: target + totalPaused)
+    }
+}
+
 enum ClickExecutionPlanner {
     static func clicksThisRound(gesture: ClickGesture, remaining: Int?) -> Int {
         let planned = gesture == .double ? 2 : 1

@@ -168,3 +168,14 @@
 "combined.controller.playbackLimitation" = "Controller input is preserved in the timeline. Public macOS APIs cannot inject controller events into other apps, so playback restores mouse and keyboard input only.";
 "error.noCombinedMacro" = "There is no combined macro available to play.";
 "error.damagedCombinedMacros %@" = "Some combined macro files could not be loaded and were left unchanged: %@";
+
+// Macro playback and sharing
+"macro.playbackSettings" = "Playback Settings";
+"macro.repeatCount" = "Playback count";
+"macro.repeatCount.help" = "Includes the first playback. Enter 3 to play three times in total.";
+"macro.repeatUnlimited.help" = "Repeats until you click Stop or use a stop hotkey.";
+"sharing.import" = "Import Macro";
+"sharing.export" = "Export Macro";
+"sharing.error.invalid" = "The macro format, events, or playback settings are invalid. Choose a JSON file exported by ClickFlow.";
+"sharing.error.version" = "This macro file version is not supported. Use a compatible version of ClickFlow.";
+"sharing.error.size" = "Macro sharing files must not exceed 20 MB.";

@@ -17,29 +17,12 @@ struct MacroEditorView: View {
                 .disabled(appState.isRecording)
             }
 
-            HStack {
-                Picker("macro.repeatMode", selection: binding(\.repeatMode)) {
-                    Text("macro.repeat.once").tag(MacroRepeatMode.once)
-                    Text("macro.repeat.count").tag(MacroRepeatMode.count)
-                    Text("macro.repeat.unlimited").tag(MacroRepeatMode.unlimited)
-                }
-                if macro.repeatMode == .count {
-                    Stepper(value: binding(\.repeatCount), in: 1...100_000) {
-                        Text("\(macro.repeatCount)×")
-                    }
-                    .frame(maxWidth: 140)
-                }
-                Picker("macro.speed", selection: binding(\.playbackSpeed)) {
-                    ForEach([0.25, 0.5, 1, 1.5, 2, 4], id: \.self) { speed in
-                        Text("\(speed.formatted(.number.precision(.fractionLength(0...2))))×").tag(speed)
-                    }
-                }
-                LabeledContent("macro.repeatDelay") {
-                    TextField("", value: binding(\.repeatDelayMilliseconds), format: .number)
-                        .frame(width: 70)
-                    Text("ms")
-                }
-            }
+            MacroPlaybackSettingsView(
+                repeatMode: binding(\.repeatMode),
+                repeatCount: binding(\.repeatCount),
+                repeatDelayMilliseconds: binding(\.repeatDelayMilliseconds),
+                playbackSpeed: binding(\.playbackSpeed)
+            )
 
             Table(macro.events, selection: $selection) {
                 TableColumn("macro.time") { event in
