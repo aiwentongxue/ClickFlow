@@ -45,13 +45,17 @@ final class AppState: ObservableObject {
     let macroPlayer = MacroPlayer()
     let macroStorage = MacroStorage()
     let combinedMacroRecorder = CombinedMacroRecorder()
-    let combinedMacroPlayer = CombinedMacroPlayer()
+    let controllerOutput: CrossOverXInputPublisher
+    let combinedMacroPlayer: CombinedMacroPlayer
     let combinedMacroStorage = CombinedMacroStorage()
     let automationCoordinator = AutomationCoordinator()
     let settingsStore: SettingsStore
     private(set) var hotkeyManager: GlobalHotkeyManager?
 
     init() {
+        let controllerOutput = CrossOverXInputPublisher()
+        self.controllerOutput = controllerOutput
+        combinedMacroPlayer = CombinedMacroPlayer(controllerOutput: controllerOutput)
         let settings = SettingsStore()
         settingsStore = settings
         selectedPage = settings.loadSelectedPage()
@@ -75,6 +79,14 @@ final class AppState: ObservableObject {
         Task {
             await loadMacros()
             await loadCombinedMacros()
+        }
+        do {
+            try controllerOutput.startPhysicalPassthrough()
+        } catch {
+            userMessage = error.localizedDescription
+            AppLogger.automation.error(
+                "Physical controller passthrough failed: \(error.localizedDescription, privacy: .public)"
+            )
         }
     }
 
@@ -415,6 +427,7 @@ final class AppState: ObservableObject {
 
     func shutdown() {
         emergencyStop()
+        controllerOutput.stopPhysicalPassthrough()
         saveNavigationState()
         hotkeyManager?.shutdown()
     }
@@ -664,7 +677,8 @@ final class AppState: ObservableObject {
     }
 
     private func play(combinedMacro: CombinedMacro) {
-        guard permissionManager.canPostEvents else {
+        let requiresEventPostingPermission = combinedMacro.requiresEventPostingPermission
+        guard !requiresEventPostingPermission || permissionManager.canPostEvents else {
             userMessage = String(localized: "error.accessibilityRequired")
             return
         }
@@ -693,7 +707,9 @@ final class AppState: ObservableObject {
                 configuredCount: combinedMacro.repeatCount
             )
             automationCoordinator.begin(.combinedPlayback(combinedMacro.id))
-            permissionManager.beginPostingPermissionMonitoring()
+            if requiresEventPostingPermission {
+                permissionManager.beginPostingPermissionMonitoring()
+            }
             settingsStore.setRecentCombinedMacroID(combinedMacro.id)
             await combinedMacroPlayer.start(
                 macro: combinedMacro,
@@ -712,7 +728,9 @@ final class AppState: ObservableObject {
                         self?.combinedPlaybackSessionID = nil
                         self?.isPlayingCombinedMacro = false
                         self?.isCombinedMacroPaused = false
-                        self?.permissionManager.stopPostingPermissionMonitoring()
+                        if requiresEventPostingPermission {
+                            self?.permissionManager.stopPostingPermissionMonitoring()
+                        }
                         self?.playingCombinedMacroID = nil
                         self?.combinedPlaybackLoopCount = nil
                         self?.automationCoordinator.end(.combinedPlayback(combinedMacro.id))
@@ -720,7 +738,9 @@ final class AppState: ObservableObject {
                     }
                 }
             )
-            if combinedMacro.containsControllerEvents {
+            if combinedMacro.containsControllerEvents,
+               settingsStore.shouldShowControllerPlaybackNotice {
+                settingsStore.markControllerPlaybackNoticeShown()
                 userMessage = String(localized: "combined.controller.playbackLimitation")
             }
         }

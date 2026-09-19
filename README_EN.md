@@ -24,6 +24,8 @@ Mouse coordinates retain their original screen positions; recipients should adju
 - Record mouse movement, three-button down/up events, dragging, and scrolling.
 - Record the full mouse path or click positions only.
 - Record combined mouse and keyboard input, plus controllers recognized by GameController such as Xbox, DualSense, and Switch controllers.
+- Replay A/B/X/Y, D-pad, shoulders, triggers, sticks, Start/View, L3/R3, and Guide through the experimental CrossOver XInput proxy; while ClickFlow is running, physical controller input is passed through to the same XInput slot and mixed with the macro per control.
+- The CrossOver Controller Macro Setup, Diagnostics & Restore entry at the bottom of Combined Macros opens a secondary page that discovers CrossOver installations and bottles, applies runtime-validated profiles for Aniimo, Genshin Impact, and Zenless Zone Zero, and provides per-game install, diagnostics, backups, and safe restore. See [CrossOver controller adapter](docs/CrossOverControllerAdapter.md).
 - Continue recording at the end of an existing mouse or combined macro. Clicking the on-screen stop button is excluded from the saved recording.
 - Sample mouse movement at approximately 60 Hz with a distance threshold to reduce redundant events.
 - Play macros at 0.25×, 0.5×, 1×, 1.5×, 2×, or 4× speed.
@@ -158,7 +160,7 @@ Recording and playback use Quartz global point coordinates from `CGEvent.locatio
 
 ## Known Limitations
 
-- Combined macros can record controller input, but Apple's public GameController API cannot inject controller events into other applications. Playback therefore restores mouse and keyboard input only while retaining controller events in the timeline. See [GCController](https://developer.apple.com/documentation/gamecontroller/gccontroller) and [shouldMonitorBackgroundEvents](https://developer.apple.com/documentation/gamecontroller/gccontroller/shouldmonitorbackgroundevents).
+- Apple's public GameController API still cannot inject controller events into other macOS applications. Controller playback currently works only for CrossOver/Wine XInput games configured with the [experimental XInput proxy](Experimental/CrossOverXInputProxy/README.md); it is not a system-wide virtual controller. DirectInput, raw HID, GameInput, direct SDL input, and anti-cheat games may bypass or reject it.
 - Conditional triggers and scripting are not implemented.
 - Coordinates are not automatically remapped after a display-layout change.
 - Trackpad inertia and gesture phases are not fully preserved; playback uses the captured horizontal and vertical scroll deltas.

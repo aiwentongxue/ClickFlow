@@ -1,0 +1,11 @@
+EXPORTS
+    ClickFlowXInputProxyMarker
+    XInputGetState
+    XInputSetState
+    XInputGetCapabilities
+    XInputEnable
+    XInputGetBatteryInformation
+    XInputGetDSoundAudioDeviceGuids
+    XInputGetAudioDeviceIds
+    XInputGetKeystroke
+    XInputGetStateEx @100
