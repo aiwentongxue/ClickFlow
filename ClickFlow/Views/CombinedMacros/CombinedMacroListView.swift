@@ -16,24 +16,27 @@ private struct CombinedMacroLibraryView: View {
     var body: some View {
         HStack(spacing: 0) {
             VStack(spacing: 0) {
-                if appState.combinedMacros.isEmpty {
-                    ContentUnavailableView(
-                        "combined.empty.title",
-                        systemImage: "gamecontroller",
-                        description: Text("combined.empty.description")
-                    )
-                } else {
-                    Table(appState.combinedMacros, selection: $appState.selectedCombinedMacroID) {
-                        TableColumn("macros.name", value: \.name)
-                        TableColumn("macros.events") { Text($0.events.count.formatted()) }
-                        TableColumn("macros.duration") {
-                            Text(Duration.milliseconds($0.durationMilliseconds).formatted(.time(pattern: .minuteSecond)))
-                        }
-                        TableColumn("macros.modified") {
-                            Text($0.updatedAt, format: .dateTime.year().month().day().hour().minute())
+                Group {
+                    if appState.combinedMacros.isEmpty {
+                        ContentUnavailableView(
+                            "combined.empty.title",
+                            systemImage: "gamecontroller",
+                            description: Text("combined.empty.description")
+                        )
+                    } else {
+                        Table(appState.combinedMacros, selection: $appState.selectedCombinedMacroID) {
+                            TableColumn("macros.name", value: \.name)
+                            TableColumn("macros.events") { Text($0.events.count.formatted()) }
+                            TableColumn("macros.duration") {
+                                Text(Duration.milliseconds($0.durationMilliseconds).formatted(.time(pattern: .minuteSecond)))
+                            }
+                            TableColumn("macros.modified") {
+                                Text($0.updatedAt, format: .dateTime.year().month().day().hour().minute())
+                            }
                         }
                     }
                 }
+                .frame(maxHeight: .infinity)
 
                 Divider()
 
