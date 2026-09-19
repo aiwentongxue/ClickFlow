@@ -16,7 +16,7 @@ private struct CombinedMacroLibraryView: View {
     var body: some View {
         HStack(spacing: 0) {
             VStack(spacing: 0) {
-                Group {
+                ZStack {
                     if appState.combinedMacros.isEmpty {
                         ContentUnavailableView(
                             "combined.empty.title",
