@@ -45,7 +45,8 @@ final class AppState: ObservableObject {
     let macroPlayer = MacroPlayer()
     let macroStorage = MacroStorage()
     let combinedMacroRecorder = CombinedMacroRecorder()
-    let controllerOutput: CrossOverXInputPublisher
+    let controllerOutput: ControllerOutputRouter
+    let ojdSetup: OJDSetupModel
     let combinedMacroPlayer: CombinedMacroPlayer
     let combinedMacroStorage = CombinedMacroStorage()
     let automationCoordinator = AutomationCoordinator()
@@ -53,8 +54,9 @@ final class AppState: ObservableObject {
     private(set) var hotkeyManager: GlobalHotkeyManager?
 
     init() {
-        let controllerOutput = CrossOverXInputPublisher()
+        let controllerOutput = ControllerOutputRouter()
         self.controllerOutput = controllerOutput
+        ojdSetup = OJDSetupModel(output: controllerOutput)
         combinedMacroPlayer = CombinedMacroPlayer(controllerOutput: controllerOutput)
         let settings = SettingsStore()
         settingsStore = settings
@@ -472,6 +474,8 @@ final class AppState: ObservableObject {
         Task { @MainActor [weak self] in
             guard let self else { return }
             await stopOtherActivities(except: .combinedRecording)
+            let output = controllerOutput
+            await Task.detached { output.disconnectOJD() }.value
             do {
                 combinedRecordingContinuationMacroID = continuingMacroID
                 try await combinedMacroRecorder.start(mouseMode: mouseRecordingMode) { [weak self] progress in
@@ -738,11 +742,7 @@ final class AppState: ObservableObject {
                     }
                 }
             )
-            if combinedMacro.containsControllerEvents,
-               settingsStore.shouldShowControllerPlaybackNotice {
-                settingsStore.markControllerPlaybackNoticeShown()
-                userMessage = String(localized: "combined.controller.playbackLimitation")
-            }
+
         }
     }
 

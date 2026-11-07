@@ -25,7 +25,7 @@ ClickFlow 是使用 Swift、SwiftUI、AppKit、Quartz、GameController 与少量
 - 鼠标宏可选择完整轨迹或只记录点击位置
 - 组合宏录制鼠标、键盘，以及 Xbox、DualSense、Switch 等由 GameController 识别的手柄输入
 - 组合宏可通过实验性的 CrossOver XInput 代理回放 A/B/X/Y、方向键、肩键、扳机、摇杆、Start/View、L3/R3 与 Guide；ClickFlow 运行期间会把实体手柄透传到同一 XInput 槽位，并按控件与宏状态混合
-- “组合宏”下方的“CrossOver 手柄宏安装、诊断与恢复”二级入口可自动识别 CrossOver 版本与容器，对 Aniimo、原神和绝区零使用实机验证配置，并提供按游戏的一键安装、诊断、原 DLL/注册表备份及安全恢复；详见 [CrossOver Windows 游戏手柄宏](docs/CrossOverControllerAdapter.md)
+- “组合宏”下方的“XInput 代理”二级入口可自动识别 CrossOver 版本与容器，对 Aniimo、原神和绝区零使用实机验证配置，并提供按游戏的一键安装、诊断、原 DLL/注册表备份及安全恢复；详见 [CrossOver Windows 游戏手柄宏](docs/CrossOverControllerAdapter.md)
 - 鼠标宏和组合宏支持在现有时间轴末尾继续录制；点击界面停止按钮不会把停止按钮本身写入宏
 - 约 60 Hz 的鼠标轨迹采样与距离阈值，减少冗余事件
 - 0.25×、0.5×、1×、1.5×、2×、4× 宏播放速度
@@ -46,7 +46,7 @@ ClickFlow 是使用 Swift、SwiftUI、AppKit、Quartz、GameController 与少量
 - 当前工程启用 Swift 6 严格并发检查
 - 默认构建 `arm64`；Release 配置构建 `arm64 + x86_64`
 
-本仓库首次验证使用的是当前机器唯一安装的 **Xcode 27.0 Beta / Swift 6.4**。尚未在同版本稳定版 Xcode 上复验。
+1.0.2 使用 **Xcode 27.2** 完成构建及自动化验证，Release 包同时包含 Apple Silicon 与 Intel 架构。
 
 ## 首次启动
 
@@ -182,7 +182,7 @@ UI 状态限定在 MainActor。连点器、录制器、播放器和存储使用 
 
 ## 已知限制
 
-- Apple 的公开 GameController API 仍不提供向其他 macOS 应用注入手柄事件的能力。当前手柄回放只对安装了 [实验性 XInput 代理](Experimental/CrossOverXInputProxy/README.md) 的 CrossOver/Wine XInput 游戏生效，并非系统级虚拟手柄；DirectInput、Raw HID、GameInput、SDL 直连或带反作弊的游戏可能绕过或拒绝它。
+- Apple 的公开 GameController API 仍不提供向其他 macOS 应用注入手柄事件的能力。XInput 手柄回放只对安装了 [实验性 XInput 代理](Experimental/CrossOverXInputProxy/README.md) 的 CrossOver/Wine XInput 游戏生效，该后端并非系统级虚拟手柄；DirectInput、Raw HID、GameInput、SDL 直连或带反作弊的游戏可能绕过或拒绝它。
 - 尚未实现条件触发或脚本。
 - 显示器布局变化时不会自动重映射坐标。
 - 触控板的滚动惯性/手势阶段不会完整保存，只回放实际水平和垂直滚动增量。
@@ -193,3 +193,7 @@ UI 状态限定在 MainActor。连点器、录制器、播放器和存储使用 
 ## 版权声明
 
 Copyright © 2026 我是艾文喵
+
+## OJD 系统手柄（1.0.2）
+
+组合宏可逐个选择 XInput 代理或 OJD 系统虚拟手柄。OJD 面向兼容的原生 Mac / PlayCover 游戏，提供官方签名组件的一键安装、连接、检查、实体输入与宏混合。旧宏继续使用 XInput。使用方法、设备选择与依赖许可见 [OJD 系统虚拟手柄](docs/OJDController.md)。

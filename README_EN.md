@@ -25,7 +25,7 @@ Mouse coordinates retain their original screen positions; recipients should adju
 - Record the full mouse path or click positions only.
 - Record combined mouse and keyboard input, plus controllers recognized by GameController such as Xbox, DualSense, and Switch controllers.
 - Replay A/B/X/Y, D-pad, shoulders, triggers, sticks, Start/View, L3/R3, and Guide through the experimental CrossOver XInput proxy; while ClickFlow is running, physical controller input is passed through to the same XInput slot and mixed with the macro per control.
-- The CrossOver Controller Macro Setup, Diagnostics & Restore entry at the bottom of Combined Macros opens a secondary page that discovers CrossOver installations and bottles, applies runtime-validated profiles for Aniimo, Genshin Impact, and Zenless Zone Zero, and provides per-game install, diagnostics, backups, and safe restore. See [CrossOver controller adapter](docs/CrossOverControllerAdapter.md).
+- The XInput proxy entry at the bottom of Combined Macros opens a secondary page that discovers CrossOver installations and bottles, applies runtime-validated profiles for Aniimo, Genshin Impact, and Zenless Zone Zero, and provides per-game install, diagnostics, backups, and safe restore. See [CrossOver controller adapter](docs/CrossOverControllerAdapter.md).
 - Continue recording at the end of an existing mouse or combined macro. Clicking the on-screen stop button is excluded from the saved recording.
 - Sample mouse movement at approximately 60 Hz with a distance threshold to reduce redundant events.
 - Play macros at 0.25×, 0.5×, 1×, 1.5×, 2×, or 4× speed.
@@ -46,7 +46,7 @@ No user-action global hotkeys are assigned on a fresh installation. The Settings
 - Swift 6 strict concurrency checking is enabled.
 - Debug builds target `arm64` by default; Release builds target `arm64 + x86_64`.
 
-The initial project verification used the only Xcode installation available on the development Mac: **Xcode 27.0 Beta / Swift 6.4**. The project has not yet been reverified with the equivalent stable Xcode release.
+Version 1.0.2 was built and tested with **Xcode 27.2**. Release builds contain both Apple Silicon and Intel architectures.
 
 ## First Launch
 
@@ -160,7 +160,7 @@ Recording and playback use Quartz global point coordinates from `CGEvent.locatio
 
 ## Known Limitations
 
-- Apple's public GameController API still cannot inject controller events into other macOS applications. Controller playback currently works only for CrossOver/Wine XInput games configured with the [experimental XInput proxy](Experimental/CrossOverXInputProxy/README.md); it is not a system-wide virtual controller. DirectInput, raw HID, GameInput, direct SDL input, and anti-cheat games may bypass or reject it.
+- Apple's public GameController API still cannot inject controller events into other macOS applications. The XInput backend works only for CrossOver/Wine XInput games configured with the [experimental XInput proxy](Experimental/CrossOverXInputProxy/README.md); it is not a system-wide virtual controller. DirectInput, raw HID, GameInput, direct SDL input, and anti-cheat games may bypass or reject it.
 - Conditional triggers and scripting are not implemented.
 - Coordinates are not automatically remapped after a display-layout change.
 - Trackpad inertia and gesture phases are not fully preserved; playback uses the captured horizontal and vertical scroll deltas.
@@ -171,3 +171,7 @@ Recording and playback use Quartz global point coordinates from `CGEvent.locatio
 ## Copyright
 
 Copyright © 2026 我是艾文喵
+
+## OJD system controller (1.0.2)
+
+Each combined macro explicitly selects XInput proxy or OJD system virtual controller. OJD targets compatible native Mac and PlayCover games, with official-component installation, connection checks, and physical input mixed with macros. Legacy macros retain XInput. See [OJD controller setup](docs/OJDController.md).

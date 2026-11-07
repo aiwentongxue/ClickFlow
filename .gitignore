@@ -80,3 +80,6 @@ backups/
 
 # Instruments / profiling output
 *.trace
+
+# Local release deliverables
+dist/

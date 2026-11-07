@@ -182,8 +182,9 @@
 
 // CrossOver Windows game controller adapters
 "common.cancel" = "Cancel";
-"combined.windowsGames.entry" = "CrossOver Controller Macro Setup, Diagnostics & Restore";
-"combined.windowsGames.navigationTitle" = "CrossOver Controller Macros";
+"combined.windowsGames.entry" = "XInput proxy";
+"combined.windowsGames.entry.detail" = "CrossOver / Wine · Install, diagnose and restore";
+"combined.windowsGames.navigationTitle" = "XInput proxy";
 "windowsGames.title" = "CrossOver Controller Macros";
 "windowsGames.explanation" = "Mix physical-controller and ClickFlow macro state, then expose it to CrossOver/Wine through per-game XInput proxy DLLs. Installation is scoped to the selected game and bottle.";
 "windowsGames.notVirtualHID" = "This is a CrossOver-only XInput path. It does not create a macOS virtual HID device and native Mac games cannot see it.";
@@ -247,3 +248,64 @@
 "windowsGames.error.missingProxy %@" = "Proxy resource %@ is missing from the app.";
 "windowsGames.error.commandFailed %@" = "The CrossOver registry command failed: %@";
 "windowsGames.error.changedFile %@" = "%@ changed after installation. Restore stopped to avoid overwriting the newer file.";
+
+// OJD and manual controller output
+"controller.backend" = "Controller output";
+"controller.backend.xinput" = "XInput proxy";
+"controller.backend.ojd" = "OJD system virtual controller";
+"controller.backend.xinput.description" = "For CrossOver/Wine games with the ClickFlow XInput proxy installed. Physical input and macros share one XInput slot.";
+"controller.backend.ojd.description" = "Publishes a system-visible Xbox-compatible controller through OJD for compatible native Mac and PlayCover games. Mixes physical input with macros without installing game DLLs.";
+"ojd.title" = "OJD Controller Service";
+"ojd.entry" = "OJD system virtual controller";
+"ojd.entry.detail" = "Native Mac / PlayCover · Install, connect and check";
+"ojd.instructions" = "Install the component, connect the service, then select OJD in your macro. Connect before launching games that detect controllers at startup. Stopping a macro returns control to the physical controller; disconnecting removes ClickFlow’s virtual device.";
+"ojd.source" = "Physical input source";
+"ojd.source.none" = "No physical controller";
+"ojd.source.help" = "Choose a physical source before connecting. Devices appearing during a connection cannot become input sources automatically. If your game reads both physical and virtual controllers, select the virtual device in the game to avoid duplicate input.";
+"ojd.refreshSources" = "Refresh physical controllers";
+"ojd.install" = "Install official component";
+"ojd.check" = "Check";
+"ojd.connect" = "Connect controller";
+"ojd.disconnect" = "Disconnect controller";
+"ojd.feed.active" = "ClickFlow controller connected";
+"ojd.feed.inactive" = "ClickFlow controller disconnected";
+"ojd.installing" = "Downloading, verifying and installing the official OJD component…";
+"ojd.installed" = "Official OJD component installed. Click Connect Controller to start.";
+"ojd.verified" = "Official signature and virtual HID entitlement verified.";
+"ojd.connecting" = "Starting service and connecting virtual controller…";
+"ojd.connected" = "Transport connected. Confirm button and stick input in the target game.";
+"ojd.disconnected" = "ClickFlow’s virtual controller disconnected.";
+"ojd.dependency" = "Uses the officially signed OpenJoystickDriver 0.6.0-alpha.1 component (MIT), preserving its vendor identity and entitlements. Confirm initial input permissions in macOS.";
+"ojd.website" = "OJD official release";
+"ojd.error.timeout" = "OJD timed out. Sending stopped; check the service and reconnect.";
+"ojd.error.missing" = "OJD is not installed. Open OJD management below Combined Macros and install the component.";
+"ojd.error.version" = "Official OJD 0.6.0-alpha.1 is required. The existing application was preserved; check its version.";
+"ojd.error.entitlement" = "OJD is missing its virtual HID entitlement. Use the official signed bundle.";
+"ojd.error.cliConflict" = "Another file occupies the OJD command path and was preserved. Check ClickFlow’s OJD support directory.";
+"ojd.error.notRunning" = "OJD service is not ready. Check system permissions and reconnect.";
+"ojd.error.download" = "Could not download the official OJD component. Check your connection and retry.";
+"ojd.error.hash" = "OJD download checksum failed. Nothing was executed or installed; download again.";
+"ojd.error.disconnected" = "The OJD controller disconnected and the macro stopped. Check the service and reconnect.";
+
+"ojd.error.notEnumerated" = "OJD has not created a controller recognized by GameController. Check OJD’s system input permissions and reconnect.";
+
+"ojd.permissions.open" = "Open OJD (restart after granting access)";
+"ojd.permissions.help" = "Grant access to OpenJoystickDriver. If it is missing, use + to add /Applications/OpenJoystickDriver.app. Reopen OJD after granting access, then return here to check and connect. Xbox USB driver approval, local endpoints and WebSocket are not needed.";
+
+"ojd.permissions.title" = "First use: system permissions";
+
+"ojd.permissions.input" = "Input Monitoring";
+
+"ojd.permissions.inject" = "Device Control / Accessibility";
+
+"ojd.permissions.copyPath" = "Copy component path";
+
+"ojd.permissions.recheck" = "Recheck permissions";
+
+"ojd.permissions.settings" = "Open settings";
+
+"ojd.permissions.granted" = "Allowed";
+
+"ojd.permissions.unknown" = "Not ready";
+
+"ojd.error.permissions" = "Use System Permissions below to allow OpenJoystickDriver in Input Monitoring and Device Control / Accessibility. If missing, add the component with +, reopen OJD after granting access, then connect.";
