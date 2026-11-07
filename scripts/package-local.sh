@@ -20,5 +20,4 @@ trap 'rm -rf "$stage"' EXIT
 ln -s /Applications "$stage/Applications"
 /usr/bin/hdiutil create -ov -format UDZO -volname "ClickFlow $version" \
   -srcfolder "$stage" "$output/ClickFlow-$version.dmg"
-/usr/bin/ditto --norsrc --noextattr "$stage/ClickFlow.app" "$output/ClickFlow.app"
 echo "Packaged app: $output"
