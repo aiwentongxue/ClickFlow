@@ -46,7 +46,7 @@ ClickFlow 是使用 Swift、SwiftUI、AppKit、Quartz、GameController 与少量
 - 当前工程启用 Swift 6 严格并发检查
 - 默认构建 `arm64`；Release 配置构建 `arm64 + x86_64`
 
-1.0.2 使用 **Xcode 27.2** 完成构建及自动化验证，Release 包同时包含 Apple Silicon 与 Intel 架构。
+1.0.3 使用 **Xcode 27.2** 完成构建及自动化验证，Release 包同时包含 Apple Silicon 与 Intel 架构。
 
 ## 首次启动
 
@@ -194,6 +194,8 @@ UI 状态限定在 MainActor。连点器、录制器、播放器和存储使用 
 
 Copyright © 2026 我是艾文喵
 
-## OJD 系统手柄（1.0.2）
+## OJD 系统手柄（1.0.3）
 
 组合宏可逐个选择 XInput 代理或 OJD 系统虚拟手柄。OJD 面向兼容的原生 Mac / PlayCover 游戏，提供官方签名组件的一键安装、连接、检查、实体输入与宏混合。旧宏继续使用 XInput。使用方法、设备选择与依赖许可见 [OJD 系统虚拟手柄](docs/OJDController.md)。
+
+OJD 官方组件安装在当前用户的 `~/Library/Application Support/ClickFlow/OJD/OpenJoystickDriver.app`。1.0.3 支持从旧 `/Applications` 安装迁移，显式切换服务，并在游戏验收后将旧副本移到废纸篓。

@@ -26,6 +26,7 @@ final class OJDCLITransport: OJDFrameTransport, @unchecked Sendable {
         FileManager.default.createFile(atPath: errorURL.path, contents: nil)
         errorFile = try FileHandle(forWritingTo: errorURL)
         process.executableURL = cli
+        process.environment = OJDService.cliEnvironment
         process.arguments = ["--json", "--no-input", "--no-color", "--timeout", "2", "virtual", "feed", "--as", "game-controller-compatible"]
         process.standardInput = input
         process.standardOutput = FileHandle.nullDevice

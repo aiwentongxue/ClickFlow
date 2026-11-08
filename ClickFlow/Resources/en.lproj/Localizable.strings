@@ -290,7 +290,7 @@
 "ojd.error.notEnumerated" = "OJD has not created a controller recognized by GameController. Check OJD’s system input permissions and reconnect.";
 
 "ojd.permissions.open" = "Open OJD (restart after granting access)";
-"ojd.permissions.help" = "Grant access to OpenJoystickDriver. If it is missing, use + to add /Applications/OpenJoystickDriver.app. Reopen OJD after granting access, then return here to check and connect. Xbox USB driver approval, local endpoints and WebSocket are not needed.";
+"ojd.permissions.help" = "Grant access to OpenJoystickDriver. If missing, click +, press ⌘⇧G and paste the component path: %@. Reopen OJD after granting access, then return to check and connect. Xbox USB driver approval, local endpoints and WebSocket are not needed.";
 
 "ojd.permissions.title" = "First use: system permissions";
 
@@ -309,3 +309,25 @@
 "ojd.permissions.unknown" = "Not ready";
 
 "ojd.error.permissions" = "Use System Permissions below to allow OpenJoystickDriver in Input Monitoring and Device Control / Accessibility. If missing, add the component with +, reopen OJD after granting access, then connect.";
+
+// Application Support component migration
+"ojd.location" = "Component location";
+"ojd.reveal" = "Show in Finder";
+"ojd.migrated" = "Official component copied to ClickFlow’s support directory. The old copy is preserved. Switch any running old service, verify game input, then move the old copy to Trash.";
+"ojd.switchNeeded" = "OJD is running from another location. Switch the service before connecting.";
+"ojd.switch" = "Quit old component and switch";
+"ojd.switchConfirm" = "This normally quits OJD in /Applications and starts the copy in ClickFlow’s support directory. Other applications using OJD will lose their input connection. If the old component cannot quit normally, the switch stops.";
+"ojd.switching" = "Waiting for the old component to quit and starting OJD from the new location…";
+"ojd.switched" = "OJD started from ClickFlow’s support directory. Connect the controller and verify game input.";
+"ojd.legacyHelp" = "The old /Applications copy is preserved. Connect the new component and confirm buttons and sticks in the game before removing the old copy.";
+"ojd.confirmInput" = "I confirmed the new component’s buttons and sticks in the game";
+"ojd.trashLegacy" = "Move old component to Trash";
+"ojd.legacyTrashed" = "Migration complete. The old /Applications copy is in Trash and can be restored.";
+"ojd.legacyTrashFailed" = "Could not move the old component to Trash. The original copy was preserved.";
+"ojd.error.legacyPreserved" = "The old OJD copy was preserved and was not migrated. Check the following reason:";
+"ojd.error.processPath" = "Could not verify the running OJD path. The service was not connected or switched.";
+"ojd.error.externalService" = "OJD is running from another location. Use “Quit old component and switch” in OJD management, or quit that component and retry.";
+"ojd.error.serviceLocation" = "OJD is not running from ClickFlow’s support directory. The operation stopped.";
+"ojd.error.otherService" = "This OJD service is outside the old /Applications location and was not quit. Quit it before connecting.";
+"ojd.error.quit" = "The old OJD could not quit normally and was not force-quit. Quit it and retry.";
+"ojd.error.confirmInput" = "Connect the new component and confirm game input before removing the old copy.";

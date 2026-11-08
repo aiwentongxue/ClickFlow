@@ -9,6 +9,9 @@ final class OJDSetupModel: ObservableObject {
     @Published var permissions = OJDPermissionStatus.unknown
     @Published var sources: [ControllerSourceChoice] = []
     @Published var selectedSourceID = ""
+    @Published var externalServicePaths: [String] = []
+    @Published var legacyAvailable = false
+    @Published var inputConfirmed = false
     private let output: ControllerOutputRouter
 
     init(output: ControllerOutputRouter) { self.output = output }
@@ -41,10 +44,10 @@ final class OJDSetupModel: ObservableObject {
         guard !busy else { return }
         busy = true; message = String(localized: "ojd.installing")
         do {
-            try await Task.detached { try await OJDService().install() }.value
-            message = String(localized: "ojd.installed")
+            let result = try await Task.detached { try await OJDService().install() }.value
+            message = String(localized: result == .migrated ? "ojd.migrated" : "ojd.installed")
         } catch { message = error.localizedDescription }
-        busy = false; refreshSources(); await refreshPermissions()
+        busy = false; refreshSources(); await refreshComponentState(); await refreshPermissions()
     }
     func inspect() async {
         guard !busy else { return }
@@ -52,12 +55,13 @@ final class OJDSetupModel: ObservableObject {
         do {
             let permissions = try await Task.detached {
                 let service = OJDService()
+                try service.verify()
                 return try OJDPermissionStatus.decodeStatus(service.status())
             }.value
             self.permissions = permissions
             message = String(localized: "ojd.verified")
         } catch { message = error.localizedDescription }
-        busy = false; refreshSources(); await refreshPermissions()
+        busy = false; refreshSources(); await refreshComponentState(); await refreshPermissions()
     }
     func connect() async {
         guard !busy else { return }
@@ -67,13 +71,49 @@ final class OJDSetupModel: ObservableObject {
             try await Task.detached { try output.connectOJD() }.value
             message = String(localized: "ojd.connected")
         } catch { message = error.localizedDescription }
-        busy = false; refreshSources(); await refreshPermissions()
+        busy = false; refreshSources(); await refreshComponentState(); await refreshPermissions()
     }
     func openComponent() async {
         do {
-            try await Task.detached { try OJDService().verify() }.value
+            try await Task.detached {
+                let service = OJDService()
+                try service.verify(); try service.requireNoExternalService()
+            }.value
             NSWorkspace.shared.open(OJDService.appURL)
         } catch { message = error.localizedDescription }
+    }
+
+    func refreshComponentState() async {
+        guard !busy else { return }
+        legacyAvailable = FileManager.default.fileExists(atPath: OJDPaths.current.legacyAppURL.path)
+        do {
+            externalServicePaths = try await Task.detached { try OJDService().externalInstances().map { $0.executableURL.path } }.value
+        } catch { message = error.localizedDescription }
+    }
+
+    func switchService() async {
+        guard !busy else { return }
+        busy = true; message = String(localized: "ojd.switching")
+        let output = output
+        do {
+            try await Task.detached {
+                output.disconnectOJD()
+                try OJDService().switchService(confirmed: true)
+            }.value
+            message = String(localized: "ojd.switched")
+        } catch { message = error.localizedDescription }
+        busy = false; refreshSources(); await refreshComponentState(); await refreshPermissions()
+    }
+
+    func trashLegacy() async {
+        guard !busy, connected, inputConfirmed else { return }
+        busy = true
+        do {
+            try await Task.detached { try OJDService().trashLegacy(inputConfirmed: true) }.value
+            message = String(localized: "ojd.legacyTrashed")
+            inputConfirmed = false
+        } catch { message = String(localized: "ojd.legacyTrashFailed") + "\n" + error.localizedDescription }
+        busy = false; await refreshComponentState()
     }
 
     func refreshPermissions() async {
@@ -91,7 +131,7 @@ final class OJDSetupModel: ObservableObject {
         let output = output
         await Task.detached { output.disconnectOJD() }.value
         message = String(localized: "ojd.disconnected")
-        busy = false; refreshSources(); await refreshPermissions()
+        busy = false; refreshSources(); await refreshComponentState(); await refreshPermissions()
     }
 }
 
@@ -100,6 +140,7 @@ struct ControllerSourceChoice: Identifiable { var id: String; var name: String }
 struct OJDSetupView: View {
     @ObservedObject var model: OJDSetupModel
     @EnvironmentObject private var appState: AppState
+    @State private var confirmingSwitch = false
     private var activityRunning: Bool { appState.isPlayingCombinedMacro || appState.isRecordingCombinedMacro }
 
     var body: some View {
@@ -112,6 +153,29 @@ struct OJDSetupView: View {
                         Text("ojd.instructions").foregroundStyle(.secondary)
                     }.frame(maxWidth: .infinity, alignment: .leading)
                 }
+                GroupBox("ojd.location") {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text(OJDService.appURL.path).font(.callout).textSelection(.enabled)
+                        HStack {
+                            Button("ojd.permissions.copyPath") {
+                                NSPasteboard.general.clearContents()
+                                NSPasteboard.general.setString(OJDService.appURL.path, forType: .string)
+                            }
+                            Button("ojd.reveal") { NSWorkspace.shared.activateFileViewerSelecting([OJDService.appURL]) }
+                        }
+                        if !model.externalServicePaths.isEmpty {
+                            Text("ojd.switchNeeded").foregroundStyle(.orange)
+                            ForEach(model.externalServicePaths, id: \.self) { Text($0).font(.footnote).textSelection(.enabled) }
+                            Button("ojd.switch") { confirmingSwitch = true }
+                        }
+                        if model.legacyAvailable {
+                            Text("ojd.legacyHelp").font(.footnote).foregroundStyle(.secondary)
+                            Toggle("ojd.confirmInput", isOn: $model.inputConfirmed)
+                            Button("ojd.trashLegacy") { Task { await model.trashLegacy() } }
+                                .disabled(!model.connected || !model.inputConfirmed || !model.externalServicePaths.isEmpty)
+                        }
+                    }.frame(maxWidth: .infinity, alignment: .leading).padding(6)
+                }.disabled(model.busy || activityRunning)
                 GroupBox("ojd.source") {
                     VStack(alignment: .leading, spacing: 10) {
                         Picker("ojd.source", selection: Binding(get: { model.selectedSourceID }, set: model.selectSource)) {
@@ -141,7 +205,7 @@ struct OJDSetupView: View {
                         permissionRow("ojd.permissions.inject", state: model.permissions.inputInject) {
                             appState.permissionManager.openAccessibilitySettings()
                         }
-                        Text("ojd.permissions.help").font(.footnote).foregroundStyle(.secondary)
+                        Text(String(format: String(localized: "ojd.permissions.help"), OJDService.appURL.path)).font(.footnote).foregroundStyle(.secondary)
                         HStack {
                             Button("ojd.permissions.copyPath") {
                                 NSPasteboard.general.clearContents()
@@ -151,7 +215,7 @@ struct OJDSetupView: View {
                             Button("ojd.permissions.recheck") { Task { await model.refreshPermissions() } }
                         }
                     }.padding(6)
-                }
+                }.disabled(model.busy || activityRunning)
                 Label(model.connected ? "ojd.feed.active" : "ojd.feed.inactive", systemImage: model.connected ? "checkmark.circle" : "circle")
                 if !model.message.isEmpty {
                     Text(model.message).font(.callout).textSelection(.enabled)
@@ -162,11 +226,16 @@ struct OJDSetupView: View {
             }.padding(24).frame(maxWidth: 900, alignment: .leading)
         }
         .navigationTitle("ojd.title")
+        .alert("ojd.switch", isPresented: $confirmingSwitch) {
+            Button("common.cancel", role: .cancel) {}
+            Button("ojd.switch") { Task { await model.switchService() } }
+        } message: { Text("ojd.switchConfirm") }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
-            Task { await model.refreshPermissions() }
+            Task { await model.refreshComponentState(); await model.refreshPermissions() }
         }
         .task {
             model.refreshSources()
+            await model.refreshComponentState()
             await model.refreshPermissions()
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(1))

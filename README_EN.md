@@ -46,7 +46,7 @@ No user-action global hotkeys are assigned on a fresh installation. The Settings
 - Swift 6 strict concurrency checking is enabled.
 - Debug builds target `arm64` by default; Release builds target `arm64 + x86_64`.
 
-Version 1.0.2 was built and tested with **Xcode 27.2**. Release builds contain both Apple Silicon and Intel architectures.
+Version 1.0.3 was built and tested with **Xcode 27.2**. Release builds contain both Apple Silicon and Intel architectures.
 
 ## First Launch
 
@@ -172,6 +172,8 @@ Recording and playback use Quartz global point coordinates from `CGEvent.locatio
 
 Copyright © 2026 我是艾文喵
 
-## OJD system controller (1.0.2)
+## OJD system controller (1.0.3)
 
 Each combined macro explicitly selects XInput proxy or OJD system virtual controller. OJD targets compatible native Mac and PlayCover games, with official-component installation, connection checks, and physical input mixed with macros. Legacy macros retain XInput. See [OJD controller setup](docs/OJDController.md).
+
+The official OJD bundle is installed at `~/Library/Application Support/ClickFlow/OJD/OpenJoystickDriver.app`. Version 1.0.3 migrates the old `/Applications` installation, explicitly switches the running service, and moves the old copy to Trash after game input is confirmed.

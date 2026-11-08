@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 cd "$(dirname "$0")/.."
-version=1.0.2
+version=1.0.3
 output="$PWD/dist/$version"
 mkdir -p "$output"
 xcodebuild -project ClickFlow.xcodeproj -scheme ClickFlow -configuration Release \

@@ -290,7 +290,7 @@
 "ojd.error.notEnumerated" = "OJD 尚未创建可由 GameController 识别的手柄。请确认 OJD 的系统输入权限后重新连接。";
 
 "ojd.permissions.open" = "打开 OJD（授权后重启）";
-"ojd.permissions.help" = "请为 OpenJoystickDriver 授权。列表没有它时，点 ＋ 添加 /Applications/OpenJoystickDriver.app。完成后重新打开 OJD，再回到这里检查并连接。无需批准 Xbox USB 驱动，也无需开启本地端点或 WebSocket。";
+"ojd.permissions.help" = "请为 OpenJoystickDriver 授权。列表没有它时，点 ＋，按 ⌘⇧G 并粘贴组件路径：%@。完成后重新打开 OJD，再回到这里检查并连接。无需批准 Xbox USB 驱动，也无需开启本地端点或 WebSocket。";
 
 "ojd.permissions.title" = "首次使用：系统权限";
 
@@ -309,3 +309,25 @@
 "ojd.permissions.unknown" = "尚未就绪";
 
 "ojd.error.permissions" = "请先在下方“系统权限”中，为 OpenJoystickDriver 开启输入监控和设备控制／辅助功能。列表缺项时用 ＋ 添加组件，授权后重新打开 OJD，再连接手柄。";
+
+// Application Support component migration
+"ojd.location" = "组件安装位置";
+"ojd.reveal" = "在 Finder 中显示";
+"ojd.migrated" = "官方组件已复制到 ClickFlow 支持目录，旧副本暂时保留。若旧服务正在运行，请先切换；游戏输入验收通过后可将旧副本移到废纸篓。";
+"ojd.switchNeeded" = "检测到其他位置的 OJD 服务，尚未连接。请退出旧组件并切换。";
+"ojd.switch" = "退出旧组件并切换";
+"ojd.switchConfirm" = "这会正常退出 /Applications 中的 OJD，并从 ClickFlow 支持目录启动。其他应用正在使用的 OJD 输入也会断开；若旧组件无法正常退出，将保留现状。";
+"ojd.switching" = "正在等待旧组件退出并启动新位置的 OJD…";
+"ojd.switched" = "OJD 已从 ClickFlow 支持目录启动。请连接手柄并验证游戏输入。";
+"ojd.legacyHelp" = "旧 /Applications 副本暂时保留。新位置的组件连接后，请先在游戏里确认按钮和摇杆正常，再移除旧副本。";
+"ojd.confirmInput" = "已在游戏中确认新组件的按钮和摇杆正常";
+"ojd.trashLegacy" = "将旧组件移到废纸篓";
+"ojd.legacyTrashed" = "迁移完成。旧 /Applications 副本已移到废纸篓，可从废纸篓恢复。";
+"ojd.legacyTrashFailed" = "旧组件清理未完成，原副本已保留。";
+"ojd.error.legacyPreserved" = "旧 OJD 副本未迁移，已保留。请检查以下原因：";
+"ojd.error.processPath" = "无法确认正在运行的 OJD 路径，未连接或切换服务。";
+"ojd.error.externalService" = "OJD 正从其他位置运行。请到 OJD 管理页使用“退出旧组件并切换”，或自行退出其他位置的组件后重试。";
+"ojd.error.serviceLocation" = "OJD 服务未从 ClickFlow 支持目录运行，已停止此操作。";
+"ojd.error.otherService" = "此 OJD 服务不在旧 /Applications 位置，未自动退出。请自行退出后再连接。";
+"ojd.error.quit" = "旧 OJD 未能正常退出，未强制结束。请自行退出旧组件后重试。";
+"ojd.error.confirmInput" = "请先连接新组件并在游戏中确认输入正常，再清理旧副本。";
